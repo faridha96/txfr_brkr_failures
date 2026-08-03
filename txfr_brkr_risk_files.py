@@ -150,10 +150,31 @@ def asset_data(args):
         df_d_txfr['line'] = 'D'
         if args.line ==1:
             asset_files = pd.concat([df_d_txfr, df_t_txfr])
+            asset_files = asset_files[~((asset_files['Equipment'].isin([41158251,
+                                        41158253,
+                                        41158254,
+                                        44918680,
+                                        45247388,
+                                        45274594])) & 
+                                        (asset_files['line']=='T'))]
         elif args.line ==2:
             asset_files = df_t_txfr
+            asset_files = asset_files[~((asset_files['Equipment'].isin([41158251,
+                                                    41158253,
+                                                    41158254,
+                                                    44918680,
+                                                    45247388,
+                                                    45274594])) & 
+                                                    (asset_files['line']=='T'))]
         elif args.line == 3:
             asset_files = df_d_txfr
+            asset_files = asset_files[~((asset_files['Equipment'].isin([41158251,
+                                                    41158253,
+                                                    41158254,
+                                                    44918680,
+                                                    45247388,
+                                                    45274594])) & 
+                                                    (asset_files['line']=='T'))]
         else:
             raise ValueError('The line of the asset is not correctly selected. Choose between 1,2,3 (T&D, T, D, respectively).')
         asset_files['type'] = 'TXFR'
@@ -187,10 +208,13 @@ def asset_data(args):
 
         if args.line ==1:
             asset_files = pd.concat([df_d_brkr, df_t_brkr])
+            asset_files = asset_files[~((asset_files['Equipment'].isin([40991421])) & (asset_files['line']=='T'))]
         elif args.line ==2:
             asset_files = df_t_brkr
+            asset_files = asset_files[~((asset_files['Equipment'].isin([40991421])) & (asset_files['line']=='T'))]
         elif args.line == 3:
             asset_files = df_d_brkr
+            asset_files = asset_files[~((asset_files['Equipment'].isin([40991421])) & (asset_files['line']=='T'))]
         else:
             raise ValueError('The line of the asset is not correctly selected. Choose between 1,2,3 (T&D, T, D, respectively).')
 
