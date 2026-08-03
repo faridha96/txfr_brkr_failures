@@ -89,6 +89,11 @@ date_col = st.sidebar.selectbox(
     )
 )
 
+failure_type_col = st.sidebar.selectbox(
+    "Failure Type Column",
+    df.columns
+)
+
 asset_id_col = st.sidebar.selectbox(
 "Asset ID Column",
 df.columns
@@ -130,6 +135,18 @@ working_df[age_col] = pd.to_numeric(
 working_df[date_col] = pd.to_datetime(
     working_df[date_col],
     errors="coerce"
+)
+
+working_df[failure_type_col] = (
+    working_df[failure_type_col]
+    .astype(str)
+    .str.strip()
+    .str.upper()
+)
+
+working_df[failure_type_col] = (
+    working_df[failure_type_col]
+    .replace(["NAN", "NONE"], pd.NA)
 )
 
 
@@ -330,46 +347,107 @@ k5.metric(
 # HELPER FUNCTIONS
 # ==========================================================
 
-def create_asset_matrix(data):
+def create_risk_distribution(data):
 
-    unique_assets = (
-        data[
-            [
-                asset_id_col,
-                "POF",
-                "COF"
-            ]
-        ]
+    summary = (
+        data[[asset_id_col, "POF"]]
         .drop_duplicates()
+        .groupby("POF")
+        .size()
+        .reset_index(name="Asset Count")
     )
 
-    matrix = pd.crosstab(
-        unique_assets["POF"],
-        unique_assets["COF"]
-    )
+    summary = summary.set_index("POF")
 
-    matrix = matrix.reindex(
-        index=range(1, 6),
-        columns=range(1, 6),
+    summary = summary.reindex(
+        range(1, 6),
         fill_value=0
     )
 
-    return matrix
+    summary = summary.reset_index()
+
+    summary["Percent"] = (
+        summary["Asset Count"]
+        /
+        summary["Asset Count"].sum()
+        * 100
+    ).round(2)
+
+    return summary
+
+def create_risk_bucket_summary(data):
+
+    summary = (
+        data[[asset_id_col, "POF"]]
+        .drop_duplicates()
+        .groupby("POF")
+        .size()
+        .reset_index(name="Asset Count")
+    )
+
+    summary = summary.set_index("POF").reindex(
+        range(1, 6),
+        fill_value=0
+    )
+
+    return summary.reset_index()
 
 def create_failure_matrix(data):
 
     matrix = pd.crosstab(
         data["POF"],
-        data["COF"]
+        data[failure_type_col]
     )
 
     matrix = matrix.reindex(
         index=range(1, 6),
-        columns=range(1, 6),
         fill_value=0
     )
 
     return matrix
+
+
+def plot_failure_heatmap(matrix, title):
+
+    total = matrix.values.sum()
+
+    labels = matrix.copy().astype(str)
+
+    for r in range(matrix.shape[0]):
+        for c in range(matrix.shape[1]):
+
+            count = matrix.iloc[r, c]
+
+            pct = (
+                count / total * 100
+                if total > 0 else 0
+            )
+
+            labels.iloc[r, c] = (
+                f"{count}<br>{pct:.1f}%"
+            )
+
+    fig = px.imshow(
+        matrix,
+        color_continuous_scale="Reds",
+        aspect="auto"
+    )
+
+    fig.update_traces(
+        text=labels.values,
+        texttemplate="%{text}"
+    )
+
+    fig.update_layout(
+        title=title,
+        xaxis_title="Failure Type",
+        yaxis_title="Risk Bucket"
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
 
 
 def plot_heatmap(
@@ -399,6 +477,9 @@ def plot_heatmap(
         fig,
         use_container_width=True
     )
+
+
+
 
 # ==========================================================
 # TABS
@@ -430,35 +511,29 @@ with tab1:
 
     else:
 
-        brkr_matrix = create_asset_matrix(
+        brkr_summary = create_risk_distribution(
             brkr_df
         )
 
-        plot_heatmap(
-            brkr_matrix,
-            "BRKR Count by POF / COF Bucket",
-            "Blues"
+        fig = px.bar(
+            brkr_summary,
+            x="POF",
+            y="Asset Count",
+            text="Asset Count",
+            title="BRKR Risk Bucket Distribution"
         )
 
-        st.markdown(
-            "#### Asset Count Matrix"
-        )
-
-        st.dataframe(
-            brkr_matrix,
+        st.plotly_chart(
+            fig,
             use_container_width=True
         )
 
-        st.markdown(
-            "#### Filtered BRKR Assets"
-        )
-
         st.dataframe(
-            brkr_df.drop_duplicates(
-                subset=[asset_id_col]
-            ),
+            brkr_summary,
             use_container_width=True
         )
+
+    
 
 # ==========================================================
 # TXFR TAB
@@ -478,33 +553,25 @@ with tab2:
 
     else:
 
-        txfr_matrix = create_asset_matrix(
+        txfr_summary = create_risk_distribution(
             txfr_df
         )
 
-        plot_heatmap(
-            txfr_matrix,
-            "TXFR Count by POF / COF Bucket",
-            "Greens"
+        fig = px.bar(
+            txfr_summary,
+            x="POF",
+            y="Asset Count",
+            text="Asset Count",
+            title="TXFR Risk Bucket Distribution"
         )
 
-        st.markdown(
-            "#### Asset Count Matrix"
-        )
-
-        st.dataframe(
-            txfr_matrix,
+        st.plotly_chart(
+            fig,
             use_container_width=True
         )
 
-        st.markdown(
-            "#### Filtered TXFR Assets"
-        )
-
         st.dataframe(
-            txfr_df.drop_duplicates(
-                subset=[asset_id_col]
-            ),
+            txfr_summary,
             use_container_width=True
         )
 
@@ -536,67 +603,69 @@ with tab3:
 
     else:
 
-        failure_matrix = (
-            create_failure_matrix(
-                failure_df
-            )
+        failure_matrix = pd.crosstab(
+            failure_df["POF"],
+            failure_df[failure_type_col]
         )
 
-        plot_heatmap(
+        failure_matrix = failure_matrix.reindex(
+            index=[1, 2, 3, 4, 5],
+            fill_value=0
+        )
+
+        total_failures = failure_matrix.values.sum()
+
+        labels = failure_matrix.copy().astype(str)
+
+        for i in range(failure_matrix.shape[0]):
+            for j in range(failure_matrix.shape[1]):
+
+                cnt = failure_matrix.iloc[i, j]
+
+                pct = (
+                    cnt / total_failures * 100
+                    if total_failures > 0
+                    else 0
+                )
+
+                labels.iloc[i, j] = (
+                    f'Count: {cnt}<br>Percentage: {pct:.1f}%'
+                )
+
+        fig = px.imshow(
             failure_matrix,
-            "Failure Count by POF / COF Bucket",
-            "Reds"
+            color_continuous_scale="Reds",
+            aspect="auto"
         )
 
-        st.markdown(
-            "#### Failure Count Matrix"
+        fig.update_traces(
+            text=labels.values,
+            texttemplate="%{text}"
         )
 
-        st.dataframe(
-            failure_matrix,
+        st.plotly_chart(
+            fig,
             use_container_width=True
         )
 
-        bucket_summary = (
+
+        failure_summary = (
     failure_df
-    .groupby(risk_col)
+    .groupby(
+        ["POF", failure_type_col]
+    )
     .size()
-    .reset_index(name="Failure Count")
-)       
+    .reset_index(name="Count")
+)
 
-        total_bucket_failures = (
-            bucket_summary["Failure Count"]
-            .sum()
-        )
+failure_summary["Percent"] = (
+    failure_summary["Count"]
+    /
+    failure_summary["Count"].sum()
+    * 100
+).round(2)
 
-        bucket_summary["Failure %"] = (
-            bucket_summary["Failure Count"]
-            / total_bucket_failures
-            * 100
-        ).round(2)
-
-        bucket_summary = (
-            bucket_summary
-            .sort_values(
-                "Failure Count",
-                ascending=False
-            )
-        )
-
-        st.markdown(
-            "#### Failure Distribution by Bucket"
-        )
-
-        st.dataframe(
-            bucket_summary,
-            use_container_width=True
-        )
-
-        st.markdown(
-            "#### Failure Records"
-        )
-
-        st.dataframe(
-            failure_df,
-            use_container_width=True
-        )
+st.dataframe(
+    failure_summary,
+    use_container_width=True
+)
