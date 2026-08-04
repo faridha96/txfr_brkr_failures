@@ -125,13 +125,13 @@ def asset_data(args):
         file_loc = r"TXFR-T_REPLACEMENT LIST_01_12_26.xlsm"
         df = pd.read_excel(file_loc, sheet_name = "Mar 2026 Repl Ranking by Phase", index_col=None, na_values=['NA'], skiprows=0)
 
-        sel_cols = ['SAP Equipment ID', 'Sub Name',
+        sel_cols = ['SAP Equipment ID', 'Sub Name', 'Highest Cumulative POF ',
                     'Reliability Risk Matrix (PoF,CoF)']
 
         df_t_txfr = df[sel_cols]
 
-        df_t_txfr=rename_columns(df_t_txfr, ['SAP Equipment ID', 'Sub Name'], 
-                                        ['Equipment', 'Substation Name'])
+        df_t_txfr=rename_columns(df_t_txfr, ['SAP Equipment ID', 'Sub Name', 'Highest Cumulative POF '], 
+                                        ['Equipment', 'Substation Name', 'POF'])
 
         df_t_txfr['line'] = 'T'
       
@@ -140,12 +140,12 @@ def asset_data(args):
         file_loc = r"D_Transf_Risk_Ranking_Under_Const 2026.xlsx"
         df = pd.read_excel(file_loc, sheet_name = "Distribution Transformers", index_col=None, na_values=['NA'], skiprows=0, engine='openpyxl')
 
-        sel_cols = ['SAP Equipment I.D.', 'Substation Name','Reliability Risk Matrix (PoF,CoF)']
+        sel_cols = ['SAP Equipment I.D.', 'Substation Name', 'Highest POF ', 'Reliability Risk Matrix (PoF,CoF)']
 
         df_d_txfr = df[sel_cols]
 
-        df_d_txfr=rename_columns(df_d_txfr, ['SAP Equipment I.D.'], 
-                                ['Equipment'])
+        df_d_txfr=rename_columns(df_d_txfr, ['SAP Equipment I.D.', 'Highest POF '], 
+                                ['Equipment', 'POF'])
 
         df_d_txfr['line'] = 'D'
         if args.line ==1:
@@ -185,25 +185,28 @@ def asset_data(args):
         file_loc = r"T_BRKR 1-N Under Const (1 15 2026).xlsx"
         df = pd.read_excel(file_loc, sheet_name = "Transmission Breakers", index_col=None, na_values=['NA'], skiprows=0)
 
-        sel_cols = [' Equipment', 'Substation Name',
+        sel_cols = [' Equipment', 'Substation Name', 'Highest PoF'
                     'Reliability Risk Matrix (PoF,CoF)']
 
         df_t_brkr = df[sel_cols]
 
 
-        df_t_brkr=rename_columns(df_t_brkr, [' Equipment'], 
-                                ['Equipment'])
+        df_t_brkr=rename_columns(df_t_brkr, [' Equipment', 'Highest PoF'], 
+                                ['Equipment', 'POF'])
 
         df_t_brkr['line'] = 'T'
         ### distribution asset
         file_loc = r"D BRKR 1-N Under Const 2026.xlsx"
         df = pd.read_excel(file_loc, sheet_name = "Distribution Breakers", index_col=None, na_values=['NA'], skiprows=0, engine='openpyxl')
 
-        sel_cols = ['Equipment', 'Substation Name',
+        sel_cols = ['Equipment', 'Substation Name', 'Highest Cummulative PoF',
                     'Reliability Risk Matrix (PoF,CoF)']
 
         df_d_brkr = df[sel_cols]
 
+        df_d_brkr=rename_columns(df_d_brkr, ['Highest Cummulative PoF'], 
+                        ['POF'])
+        
         df_d_brkr['line'] = 'D'
 
         if args.line ==1:
