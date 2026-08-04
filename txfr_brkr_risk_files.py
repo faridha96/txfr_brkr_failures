@@ -96,7 +96,8 @@ def clean_fail(args):
 
         df_txfr = rename_columns(df_txfr, ['sap_id'], ['Equipment'])
 
-        clean_df = df_txfr
+        clean_df = df_txfr.dropna(subset=['Equipment'])
+        clean_df['Equipment'] = clean_df['Equipment'].astype(int)
 
     elif args.type == 'brkr':
         df_cb = df_fail[(df_fail["Equipment Type"]=="BRKR") & (df_fail['Date']>=f'01-01-{str(args.year)}') & (df_fail['Date']<f'01-01-{str(args.year+1)}')]
@@ -109,7 +110,8 @@ def clean_fail(args):
 
         df_cb = rename_columns(df_cb, ['sap_id'], ['Equipment'])
 
-        clean_df = df_cb
+        clean_df = df_cb.dropna(subset=['Equipment'])
+        clean_df['Equipment'] = clean_df['Equipment'].astype(int)
         
     else:
         raise ValueError('The type of the asset is not correctly selected. Choose between txfr or brkr.')
@@ -157,6 +159,8 @@ def asset_data(args):
                                         45247388,
                                         45274594])) & 
                                         (asset_files['line']=='T'))]
+            asset_files = asset_files.dropna(subset=['Equipment'])
+            asset_files['Equipment'] = asset_files['Equipment'].astype(int)
         elif args.line ==2:
             asset_files = df_t_txfr
             asset_files = asset_files[~((asset_files['Equipment'].isin([41158251,
@@ -166,6 +170,8 @@ def asset_data(args):
                                                     45247388,
                                                     45274594])) & 
                                                     (asset_files['line']=='T'))]
+            asset_files = asset_files.dropna(subset=['Equipment'])
+            asset_files['Equipment'] = asset_files['Equipment'].astype(int)
         elif args.line == 3:
             asset_files = df_d_txfr
             asset_files = asset_files[~((asset_files['Equipment'].isin([41158251,
@@ -175,6 +181,8 @@ def asset_data(args):
                                                     45247388,
                                                     45274594])) & 
                                                     (asset_files['line']=='T'))]
+            asset_files = asset_files.dropna(subset=['Equipment'])
+            asset_files['Equipment'] = asset_files['Equipment'].astype(int)
         else:
             raise ValueError('The line of the asset is not correctly selected. Choose between 1,2,3 (T&D, T, D, respectively).')
         asset_files['type'] = 'TXFR'
@@ -212,12 +220,18 @@ def asset_data(args):
         if args.line ==1:
             asset_files = pd.concat([df_d_brkr, df_t_brkr])
             asset_files = asset_files[~((asset_files['Equipment'].isin([40991421])) & (asset_files['line']=='T'))]
+            asset_files = asset_files.dropna(subset=['Equipment'])
+            asset_files['Equipment'] = asset_files['Equipment'].astype(int)
         elif args.line ==2:
             asset_files = df_t_brkr
             asset_files = asset_files[~((asset_files['Equipment'].isin([40991421])) & (asset_files['line']=='T'))]
+            asset_files = asset_files.dropna(subset=['Equipment'])
+            asset_files['Equipment'] = asset_files['Equipment'].astype(int)
         elif args.line == 3:
             asset_files = df_d_brkr
             asset_files = asset_files[~((asset_files['Equipment'].isin([40991421])) & (asset_files['line']=='T'))]
+            asset_files = asset_files.dropna(subset=['Equipment'])
+            asset_files['Equipment'] = asset_files['Equipment'].astype(int)
         else:
             raise ValueError('The line of the asset is not correctly selected. Choose between 1,2,3 (T&D, T, D, respectively).')
 

@@ -1,0 +1,7 @@
+Equipment,Equipment Type,Voltage,Substation Name_x,Future Spending,Current Spending,Date,Age,Failure Type,Substation Name_y,POF,"Reliability Risk Matrix (PoF,CoF)",line
+40991622,BRKR,12,STOCKTON A SUB,0,350,2025-02-07,52,Failure,,,,
+40996625,BRKR,115,MORAGA SUB,1000,375,2025-01-15,0,JIT,,,,
+40989873,BRKR,115,TRIMBLE SUB,250,700,2025-04-25,0,Failure,,,,
+42595876,BRKR,230,Palermo,1000,300,2025-10-20,,Failure,,,,
+40997308,BRKR,21,Stockdale,500,100,2025-11-07,48,Failure,,,,
+40992312,BRKR,14.4,Dumbarton,,100,2025-04-26,,JIT,,,,
