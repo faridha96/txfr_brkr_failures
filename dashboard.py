@@ -180,22 +180,17 @@ working_df[pof_value_col] = pd.to_numeric(
     errors="coerce"
 )
 
-# Create quantile intervals
-working_df["POF_Range"] = pd.qcut(
+quantiles = pd.qcut(
     working_df[pof_value_col],
-    q=4,
+    q=3,
     duplicates="drop"
 )
 
-# Convert intervals to readable labels
-working_df["POF_Range"] = (
-    working_df["POF_Range"]
-    .apply(
-        lambda x: (
-            f"{x.left:.2f} - {x.right:.2f}"
-            if pd.notna(x)
-            else None
-        )
+working_df["POF_Range"] = quantiles.apply(
+    lambda x: (
+        f"{x.left:.3f} - {x.right:.3f}"
+        if pd.notna(x)
+        else None
     )
 )
 
