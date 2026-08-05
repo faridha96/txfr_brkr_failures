@@ -175,10 +175,26 @@ working_df["POF"] = pd.to_numeric(
     errors="coerce"
 )
 
-working_df["POF_Quartile"] = pd.qcut(
+valid_pof = working_df[pof_value_col].dropna()
+
+n_bins = min(3, valid_pof.nunique())
+
+_, bins = pd.qcut(
+    valid_pof,
+    q=n_bins,
+    retbins=True,
+    duplicates="drop"
+)
+
+labels = [
+    f"{bins:.2f} - {bins[i+1]:.2f}"
+    for i in range(len(bins) - 1)
+]
+
+working_df["POF_Range"] = pd.qcut(
     working_df[pof_value_col],
-    q=3,
-    labels=["Q1", "Q2", "Q3"],
+    q=len(labels),
+    labels=labels,
     duplicates="drop"
 )
 
@@ -509,7 +525,7 @@ def create_quantile_heatmap_data(data):
             [
                 asset_id_col,
                 "POF",
-                "POF_Quartile"
+                "POF_Range"
             ]
         ]
         .drop_duplicates()
@@ -517,7 +533,7 @@ def create_quantile_heatmap_data(data):
 
     matrix = pd.crosstab(
         temp["POF"],
-        temp["POF_Quartile"]
+        temp["POF_Range"]
     )
 
     matrix = matrix.reindex(
