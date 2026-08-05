@@ -242,7 +242,7 @@ def asset_data(args):
 
 def join_files(asset_files, clean_df):
     return pd.merge(asset_files,
-                    clean_df[["Equipment", "Equipment Type","Date", "Age", "Failure Type"]], 
+                    clean_df[["sap_id", "Equipment Type","Date", "Age", "Failure Type"]], 
                     left_on="Equipment", 
                     right_on='sap_id',
                     how="left", indicator=True)
