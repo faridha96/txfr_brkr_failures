@@ -114,7 +114,7 @@ def clean_fail(args):
     else:
         raise ValueError('The type of the asset is not correctly selected. Choose between txfr or brkr.')
 
-    return clean_df, t_count
+    return rename_columns(clean_df, ['Equipment'], ['sap_id']), t_count
 
 def asset_data(args):
 
@@ -243,7 +243,8 @@ def asset_data(args):
 def join_files(asset_files, clean_df):
     return pd.merge(asset_files,
                     clean_df[["Equipment", "Equipment Type","Date", "Age", "Failure Type"]], 
-                    on="Equipment", 
+                    left_on="Equipment", 
+                    right_on='sap_id',
                     how="left", indicator=True)
     
 
@@ -251,7 +252,7 @@ def join_files(asset_files, clean_df):
 if __name__ == "__main__":
     args = get_args()
     faile_data,count = clean_fail(args)
-    faile_data = faile_data.drop_duplicates(subset=['Equipment'], keep='last')
+    faile_data = faile_data.drop_duplicates(subset=['sap_id'], keep='last')
     asset_files = asset_data(args)
     asset_files = asset_files.drop_duplicates(subset=['Equipment'], keep='last')
     df = join_files(asset_files,faile_data)
