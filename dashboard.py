@@ -161,10 +161,10 @@ working_df[failure_type_col] = (
     .replace(["NAN", "NONE"], pd.NA)
 )
 
-working_df[pof_value_col] = pd.to_numeric(
-    working_df[pof_value_col],
-    errors="coerce"
-)
+# working_df[pof_value_col] = pd.to_numeric(
+#     working_df[pof_value_col],
+#     errors="coerce"
+# )
 
 # ==========================================================
 # CREATE POF / COF
