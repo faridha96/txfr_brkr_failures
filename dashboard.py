@@ -163,8 +163,7 @@ working_df[failure_type_col] = (
 
 working_df[pof_value_col] = pd.to_numeric(
     working_df[pof_value_col].astype(float),
-    errors="coerce",
-    downcast ="float"
+    errors="coerce"
 )
 
 # ==========================================================
@@ -181,8 +180,7 @@ working_df["POF"] = pd.to_numeric(
 # ==========================================================
 working_df[pof_value_col] = pd.to_numeric(
 working_df[pof_value_col].astype(float),
-errors="coerce",
-    downcast ="float"
+errors="coerce"
 )
 
 # Create quantiles and capture bins
@@ -807,6 +805,67 @@ with tab3:
                 )
         
 
+
+        # ===========================================
+        # FAILURE RATE BY POF BUCKET
+        # ===========================================
+
+        # Total assets in each bucket
+        asset_bucket_counts = (
+            filtered_df[[asset_id_col, "POF"]]
+            .drop_duplicates()
+            .groupby("POF")
+            .size()
+            .reset_index(name="Asset Count")
+        )
+
+        # Total failures in each bucket
+        failure_bucket_counts = (
+            failure_df
+            .groupby("POF")
+            .size()
+            .reset_index(name="Failure Count")
+        )
+
+        # Merge together
+        failure_rate_table = pd.merge(
+            asset_bucket_counts,
+            failure_bucket_counts,
+            on="POF",
+            how="left"
+        )
+
+        failure_rate_table["Failure Count"] = (
+            failure_rate_table["Failure Count"]
+            .fillna(0)
+            .astype(int)
+        )
+
+        # Calculate failure rate
+        failure_rate_table["Failure Rate (%)"] = (
+            failure_rate_table["Failure Count"]
+            /
+            failure_rate_table["Asset Count"]
+            * 100
+        ).round(2)
+
+        # Ensure all buckets 1-5 appear
+        failure_rate_table = (
+            failure_rate_table
+            .set_index("POF")
+            .reindex(range(1, 6), fill_value=0)
+            .reset_index()
+        )
+
+        st.markdown("### Failure Rate by Risk Bucket")
+
+        st.dataframe(
+            failure_rate_table,
+            use_container_width=True
+        )
+                
+
+        
         failure_summary = (
             failure_df
             .groupby(
