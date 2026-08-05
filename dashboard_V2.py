@@ -169,8 +169,8 @@ working_df["POF"] = pd.to_numeric(
 
 working_df["POF_Quartile"] = pd.qcut(
     working_df[pof_value_col],
-    q=3,
-    labels=["Q1", "Q2", "Q3"],
+    q=4,
+    labels=["Q1", "Q2", "Q3", "Q4"],
     duplicates="drop"
 )
 
