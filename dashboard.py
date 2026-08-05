@@ -99,6 +99,11 @@ asset_id_col = st.sidebar.selectbox(
 df.columns
 )
 
+pof_value_col = st.sidebar.selectbox(
+    "POF Value Column",
+    df.columns
+)
+
 # ==========================================================
 # DATA CLEANING
 # ==========================================================
@@ -148,6 +153,10 @@ working_df[failure_type_col] = (
     .replace(["NAN", "NONE"], pd.NA)
 )
 
+working_df[pof_value_col] = pd.to_numeric(
+    working_df[pof_value_col],
+    errors="coerce"
+)
 
 # ==========================================================
 # CREATE POF / COF
@@ -156,6 +165,13 @@ working_df[failure_type_col] = (
 working_df["POF"] = pd.to_numeric(
     working_df[risk_col].str[0],
     errors="coerce"
+)
+
+working_df["POF_Quartile"] = pd.qcut(
+    working_df[pof_value_col],
+    q=4,
+    labels=["Q1", "Q2", "Q3", "Q4"],
+    duplicates="drop"
 )
 
 working_df["COF"] = pd.to_numeric(
@@ -478,7 +494,75 @@ def plot_heatmap(
     )
 
 
+def create_quantile_heatmap_data(data):
 
+    temp = (
+        data[
+            [
+                asset_id_col,
+                "POF",
+                "POF_Quartile"
+            ]
+        ]
+        .drop_duplicates()
+    )
+
+    matrix = pd.crosstab(
+        temp["POF"],
+        temp["POF_Quartile"]
+    )
+
+    matrix = matrix.reindex(
+        index=[1, 2, 3, 4, 5],
+        fill_value=0
+    )
+
+    return matrix
+
+
+
+def plot_quantile_heatmap(matrix, title):
+
+    total = matrix.values.sum()
+
+    labels = matrix.copy().astype(str)
+
+    for r in range(matrix.shape[0]):
+        for c in range(matrix.shape[1]):
+
+            cnt = matrix.iloc[r, c]
+
+            pct = (
+                cnt / total * 100
+                if total > 0
+                else 0
+            )
+
+            labels.iloc[r, c] = (
+                f"{cnt}<br>{pct:.1f}%"
+            )
+
+    fig = px.imshow(
+        matrix,
+        color_continuous_scale="Blues",
+        aspect="auto"
+    )
+
+    fig.update_traces(
+        text=labels.values,
+        texttemplate="%{text}"
+    )
+
+    fig.update_layout(
+        title=title,
+        xaxis_title="POF Quartile",
+        yaxis_title="Risk Bucket"
+    )
+
+    st.plotly_chart(
+        fig,
+        use_container_width=True
+    )
 
 # ==========================================================
 # TABS
@@ -532,7 +616,21 @@ with tab1:
             use_container_width=True
         )
 
-    
+    st.markdown("### Risk Bucket vs POF Quartile")
+
+    brkr_heatmap = create_quantile_heatmap_data(
+        brkr_df
+    )
+
+    plot_quantile_heatmap(
+        brkr_heatmap,
+        "BRKR Risk Bucket vs POF Quartile"
+    )
+
+    st.dataframe(
+        brkr_heatmap,
+        use_container_width=True
+    )
 
 # ==========================================================
 # TXFR TAB
@@ -574,6 +672,21 @@ with tab2:
             use_container_width=True
         )
 
+    st.markdown("### Risk Bucket vs POF Quartile")
+
+    txfr_heatmap = create_quantile_heatmap_data(
+        txfr_df
+    )
+
+    plot_quantile_heatmap(
+        txfr_heatmap,
+        "TXFR Risk Bucket vs POF Quartile"
+    )
+
+    st.dataframe(
+        txfr_heatmap,
+        use_container_width=True
+    )
 # ==========================================================
 # FAILURE TAB
 # ==========================================================
@@ -649,22 +762,38 @@ with tab3:
 
 
         failure_summary = (
-    failure_df
-    .groupby(
-        ["POF", failure_type_col]
-    )
-    .size()
-    .reset_index(name="Count")
-)
+            failure_df
+            .groupby(
+                ["POF", failure_type_col]
+            )
+            .size()
+            .reset_index(name="Count")
+        )
 
-failure_summary["Percent"] = (
-    failure_summary["Count"]
-    /
-    failure_summary["Count"].sum()
-    * 100
-).round(2)
+        failure_summary["Percent"] = (
+            failure_summary["Count"]
+            /
+            failure_summary["Count"].sum()
+            * 100
+        ).round(2)
 
-st.dataframe(
-    failure_summary,
-    use_container_width=True
-)
+        st.dataframe(
+            failure_summary,
+            use_container_width=True
+        )
+
+        st.markdown("### Failure Risk Bucket vs POF Quartile")
+
+        failure_heatmap = create_quantile_heatmap_data(
+            failure_df
+        )
+
+        plot_quantile_heatmap(
+            failure_heatmap,
+            "Failure Risk Bucket vs POF Quartile"
+        )
+
+        st.dataframe(
+            failure_heatmap,
+            use_container_width=True
+        )
