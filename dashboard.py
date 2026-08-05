@@ -162,7 +162,7 @@ working_df[failure_type_col] = (
 )
 
 working_df[pof_value_col] = pd.to_numeric(
-    working_df[pof_value_col],
+    working_df[pof_value_col].astyp(float),
     errors="coerce",
     downcast ="float"
 )
@@ -180,26 +180,9 @@ working_df["POF"] = pd.to_numeric(
 # POF RANGE BUCKETS
 # ==========================================================
 working_df[pof_value_col] = pd.to_numeric(
-working_df[pof_value_col],
+working_df[pof_value_col].astyp(float),
 errors="coerce",
     downcast ="float"
-)
-
-st.write("Selected POF column:", pof_value_col)
-
-st.write(
-    working_df[pof_value_col]
-    .describe()
-)
-
-st.write(
-    "Sample POF Values:"
-)
-
-st.write(
-    working_df[pof_value_col]
-    .dropna()
-    .head(20)
 )
 
 # Create quantiles and capture bins
@@ -221,8 +204,6 @@ q=len(range_labels),
 labels=range_labels,
 duplicates="drop"
 )
-# DEBUG
-st.write("POF Range Labels:", range_labels)
 
 working_df["COF"] = pd.to_numeric(
     working_df[risk_col].str[1],
