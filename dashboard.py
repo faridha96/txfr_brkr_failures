@@ -175,29 +175,30 @@ working_df["POF"] = pd.to_numeric(
     errors="coerce"
 )
 
+# ==========================================================
+# POF RANGE BUCKETS
+# ==========================================================
+
 working_df[pof_value_col] = pd.to_numeric(
     working_df[pof_value_col],
     errors="coerce"
 )
 
-quantiles = pd.qcut(
+# Create quantile intervals directly
+working_df["POF_Range"] = pd.qcut(
     working_df[pof_value_col],
-    q=3,
+    q=3,          # or 4 if you want quartiles
     duplicates="drop"
 )
-working_df["POF_Range"] = quantiles.apply(
-    lambda x: (
-        f"{x.left:.3f} - {x.right:.3f}"
-        if pd.notna(x)
-        else None
-    )
-)
 
-st.write(
-"POF Range Labels:",
-working_df["POF_Range"]
-.dropna()
-.unique()
+# Convert interval objects to readable labels
+working_df["POF_Range"] = working_df["POF_Range"].astype(str)
+
+# Clean the interval notation
+working_df["POF_Range"] = (
+    working_df["POF_Range"]
+    .str.replace("(", "", regex=False)
+    .str.replace("]", "", regex=False)
 )
 
 working_df["COF"] = pd.to_numeric(
