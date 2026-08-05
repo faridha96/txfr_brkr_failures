@@ -178,28 +178,31 @@ working_df["POF"] = pd.to_numeric(
 # ==========================================================
 # POF RANGE BUCKETS
 # ==========================================================
-
 working_df[pof_value_col] = pd.to_numeric(
-    working_df[pof_value_col],
-    errors="coerce"
+working_df[pof_value_col],
+errors="coerce"
 )
-
-# Create quantile intervals directly
+# Create quantiles and capture bins
+_, bins = pd.qcut(
+working_df[pof_value_col],
+q=3,
+retbins=True,
+duplicates="drop"
+)
+# Build labels from actual bin edges
+range_labels = [
+f"{bins[i]:.3f} - {bins[i+1]:.3f}"
+for i in range(len(bins) - 1)
+]
+# Create ordered categorical ranges
 working_df["POF_Range"] = pd.qcut(
-    working_df[pof_value_col],
-    q=3,          # or 4 if you want quartiles
-    duplicates="drop"
+working_df[pof_value_col],
+q=len(range_labels),
+labels=range_labels,
+duplicates="drop"
 )
-
-# Convert interval objects to readable labels
-working_df["POF_Range"] = working_df["POF_Range"].astype(str)
-
-# Clean the interval notation
-working_df["POF_Range"] = (
-    working_df["POF_Range"]
-    .str.replace("(", "", regex=False)
-    .str.replace("]", "", regex=False)
-)
+# DEBUG
+st.write("POF Range Labels:", range_labels)
 
 working_df["COF"] = pd.to_numeric(
     working_df[risk_col].str[1],
@@ -522,30 +525,31 @@ def plot_heatmap(
 
 
 def create_quantile_heatmap_data(data):
-
     temp = (
-        data[
-            [
-                asset_id_col,
-                "POF",
-                "POF_Range"
-            ]
-        ]
+    data[
+    [
+    asset_id_col,
+    "POF",
+    "POF_Range"
+    ]
+    ]
+    .dropna(subset=["POF_Range"])
     )
-
     matrix = pd.crosstab(
-        temp["POF"],
-        temp["POF_Range"]
+    temp["POF"],
+    temp["POF_Range"]
     )
-
+    # Force risk buckets 1-5
     matrix = matrix.reindex(
-        index=[1, 2, 3, 4, 5],
-        fill_value=0
+    index=[1, 2, 3, 4, 5],
+    fill_value=0
     )
-
+    # Force column order to match actual POF ranges
+    matrix = matrix.reindex(
+    columns=range_labels,
+    fill_value=0
+    )
     return matrix
-
-
 
 def plot_quantile_heatmap(matrix, title):
 
