@@ -614,6 +614,17 @@ with tab1:
             title="BRKR Risk Bucket Distribution"
         )
 
+        st.markdown("### Risk Bucket vs POF Quartile")
+        
+        brkr_heatmap = create_quantile_heatmap_data(
+            brkr_df
+        )
+
+        plot_quantile_heatmap(
+            brkr_heatmap,
+            "BRKR Risk Bucket vs POF Quartile"
+        )
+
         st.plotly_chart(
             fig,
             use_container_width=True
@@ -624,21 +635,11 @@ with tab1:
             use_container_width=True
         )
 
-    st.markdown("### Risk Bucket vs POF Quartile")
-
-    brkr_heatmap = create_quantile_heatmap_data(
-        brkr_df
-    )
-
-    plot_quantile_heatmap(
-        brkr_heatmap,
-        "BRKR Risk Bucket vs POF Quartile"
-    )
-
-    st.dataframe(
-        brkr_heatmap,
-        use_container_width=True
-    )
+        
+        st.dataframe(
+            brkr_heatmap,
+            use_container_width=True
+        )
 
 # ==========================================================
 # TXFR TAB
@@ -670,6 +671,18 @@ with tab2:
             title="TXFR Risk Bucket Distribution"
         )
 
+        st.markdown("### Risk Bucket vs POF Quartile")
+
+        txfr_heatmap = create_quantile_heatmap_data(
+            txfr_df
+        )
+
+        plot_quantile_heatmap(
+            txfr_heatmap,
+            "TXFR Risk Bucket vs POF Quartile"
+        )
+
+
         st.plotly_chart(
             fig,
             use_container_width=True
@@ -680,21 +693,12 @@ with tab2:
             use_container_width=True
         )
 
-    st.markdown("### Risk Bucket vs POF Quartile")
 
-    txfr_heatmap = create_quantile_heatmap_data(
-        txfr_df
-    )
 
-    plot_quantile_heatmap(
-        txfr_heatmap,
-        "TXFR Risk Bucket vs POF Quartile"
-    )
-
-    st.dataframe(
-        txfr_heatmap,
-        use_container_width=True
-    )
+        st.dataframe(
+            txfr_heatmap,
+            use_container_width=True
+        )
 # ==========================================================
 # FAILURE TAB
 # ==========================================================
@@ -767,7 +771,7 @@ with tab3:
             fig,
             use_container_width=True
         )
-        
+
         st.markdown("### Failure Risk Bucket vs POF Quartile")
         
         failure_heatmap = create_quantile_heatmap_data(
