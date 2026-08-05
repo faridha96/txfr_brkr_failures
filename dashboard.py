@@ -180,27 +180,23 @@ working_df[pof_value_col] = pd.to_numeric(
     errors="coerce"
 )
 
-valid_pof = working_df[pof_value_col].dropna()
-
-n_bins = min(3, valid_pof.nunique())
-
-_, bins = pd.qcut(
-    valid_pof,
-    q=n_bins,
-    retbins=True,
+# Create quantile intervals
+working_df["POF_Range"] = pd.qcut(
+    working_df[pof_value_col],
+    q=4,
     duplicates="drop"
 )
 
-labels = [
-    f"{bins[i]:.2f} - {bins[i+1]:.2f}"
-    for i in range(len(bins) - 1)
-]
-
-working_df["POF_Range"] = pd.qcut(
-    working_df[pof_value_col],
-    q=len(labels),
-    labels=labels,
-    duplicates="drop"
+# Convert intervals to readable labels
+working_df["POF_Range"] = (
+    working_df["POF_Range"]
+    .apply(
+        lambda x: (
+            f"{x.left:.2f} - {x.right:.2f}"
+            if pd.notna(x)
+            else None
+        )
+    )
 )
 
 working_df["COF"] = pd.to_numeric(
