@@ -161,10 +161,11 @@ working_df[failure_type_col] = (
     .replace(["NAN", "NONE"], pd.NA)
 )
 
-# working_df[pof_value_col] = pd.to_numeric(
-#     working_df[pof_value_col],
-#     errors="coerce"
-# )
+working_df[pof_value_col] = pd.to_numeric(
+    working_df[pof_value_col],
+    errors="coerce",
+    downcast ="float"
+)
 
 # ==========================================================
 # CREATE POF / COF
@@ -180,7 +181,8 @@ working_df["POF"] = pd.to_numeric(
 # ==========================================================
 working_df[pof_value_col] = pd.to_numeric(
 working_df[pof_value_col],
-errors="coerce"
+errors="coerce",
+    downcast ="float"
 )
 # Create quantiles and capture bins
 _, bins = pd.qcut(
