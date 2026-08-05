@@ -71,18 +71,18 @@ def clean_fail(args):
     df_fail = df_fail[~df_fail["Year"].isna()]
 
 
-    df_fail['Future Spending'] = pd.to_numeric(df_fail['Future Spending'], errors='coerce').fillna(0).astype(int)
-    df_fail['Current Spending'] = pd.to_numeric(df_fail['Current Spending'], errors='coerce').fillna(0).astype(int)
-    df_fail["Total Spending"] = df_fail["Future Spending"]+df_fail["Current Spending"]
+    # df_fail['Future Spending'] = pd.to_numeric(df_fail['Future Spending'], errors='coerce').fillna(0).astype(int)
+    # df_fail['Current Spending'] = pd.to_numeric(df_fail['Current Spending'], errors='coerce').fillna(0).astype(int)
+    # df_fail["Total Spending"] = df_fail["Future Spending"]+df_fail["Current Spending"]
 
-    split_vals = df_fail['Voltage'].str.split('/', expand=True)
-    split_vals = split_vals.apply(pd.to_numeric, errors='coerce')
-    split_vals[1] = split_vals[1].fillna(split_vals[0])
-    split_vals = split_vals.fillna(np.nan)
+    # split_vals = df_fail['Voltage'].str.split('/', expand=True)
+    # split_vals = split_vals.apply(pd.to_numeric, errors='coerce')
+    # split_vals[1] = split_vals[1].fillna(split_vals[0])
+    # split_vals = split_vals.fillna(np.nan)
 
-    # Assign to new columns
-    df_fail['High Vol'] = split_vals[0]
-    df_fail['Low Vol']  = split_vals[1]
+    # # Assign to new columns
+    # df_fail['High Vol'] = split_vals[0]
+    # df_fail['Low Vol']  = split_vals[1]
 
 
     if args.type == 'txfr':
@@ -90,8 +90,7 @@ def clean_fail(args):
         t_count = df_txfr.shape[0]
 
 
-        df_txfr = df_txfr[["sap_id", "Equipment Type", "Voltage", "Substation Name", 
-                                                "Future Spending", "Current Spending", "Date", "Age", "Failure Type"]]
+        df_txfr = df_txfr[["sap_id", "Equipment Type", "Substation Name",  "Date", "Age", "Failure Type"]]
 
 
         df_txfr = rename_columns(df_txfr, ['sap_id'], ['Equipment'])
@@ -104,8 +103,7 @@ def clean_fail(args):
 
         t_count = df_cb.shape[0]
 
-        df_cb = df_cb[["sap_id", "Equipment Type", "Voltage", "Substation Name", 
-                                                "Future Spending", "Current Spending", "Date", "Age", "Failure Type"]]
+        df_cb = df_cb[["sap_id", "Equipment Type", "Substation Name", "Date", "Age", "Failure Type"]]
 
 
         df_cb = rename_columns(df_cb, ['sap_id'], ['Equipment'])
@@ -193,7 +191,7 @@ def asset_data(args):
         file_loc = r"T_BRKR 1-N Under Const (1 15 2026).xlsx"
         df = pd.read_excel(file_loc, sheet_name = "Transmission Breakers", index_col=None, na_values=['NA'], skiprows=0)
 
-        sel_cols = [' Equipment', 'Substation Name', 'Highest PoF'
+        sel_cols = [' Equipment', 'Substation Name', 'Highest PoF',
                     'Reliability Risk Matrix (PoF,CoF)']
 
         df_t_brkr = df[sel_cols]

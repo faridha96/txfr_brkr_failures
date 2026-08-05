@@ -140,7 +140,6 @@ working_df[date_col] = pd.to_datetime(
 working_df[failure_type_col] = (
     working_df[failure_type_col]
     .astype(str)
-    .str.strip()
     .str.upper()
 )
 
