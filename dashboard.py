@@ -178,10 +178,6 @@ working_df["POF"] = pd.to_numeric(
 # ==========================================================
 # POF RANGE BUCKETS
 # ==========================================================
-working_df[pof_value_col] = pd.to_numeric(
-working_df[pof_value_col].astype(float),
-errors="coerce"
-)
 
 # Create quantiles and capture bins
 _, bins = pd.qcut(
@@ -531,7 +527,7 @@ def create_quantile_heatmap_data(data):
     "POF",
     "POF_Range"
     ]
-    ]
+    ].drop_duplicate()
     .dropna(subset=["POF_Range"])
     )
     matrix = pd.crosstab(
@@ -539,10 +535,10 @@ def create_quantile_heatmap_data(data):
     temp["POF_Range"]
     )
     # Force risk buckets 1-5
-    matrix = matrix.reindex(
-    index=[1, 2, 3, 4, 5],
-    fill_value=0
-    )
+    # matrix = matrix.reindex(
+    # index=[1, 2, 3, 4, 5],
+    # fill_value=0
+    # )
     # Force column order to match actual POF ranges
     matrix = matrix.reindex(
     columns=range_labels,
