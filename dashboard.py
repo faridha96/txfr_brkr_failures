@@ -184,6 +184,24 @@ working_df[pof_value_col],
 errors="coerce",
     downcast ="float"
 )
+
+st.write("Selected POF column:", pof_value_col)
+
+st.write(
+    working_df[pof_value_col]
+    .describe()
+)
+
+st.write(
+    "Sample POF Values:"
+)
+
+st.write(
+    working_df[pof_value_col]
+    .dropna()
+    .head(20)
+)
+
 # Create quantiles and capture bins
 _, bins = pd.qcut(
 working_df[pof_value_col],
