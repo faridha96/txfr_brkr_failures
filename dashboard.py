@@ -527,7 +527,7 @@ def create_quantile_heatmap_data(data):
     "POF",
     "POF_Range"
     ]
-    ].drop_duplicate()
+    ].drop_duplicates()
     .dropna(subset=["POF_Range"])
     )
     matrix = pd.crosstab(
