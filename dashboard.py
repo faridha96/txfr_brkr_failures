@@ -175,6 +175,11 @@ working_df["POF"] = pd.to_numeric(
     errors="coerce"
 )
 
+working_df[pof_value_col] = pd.to_numeric(
+    working_df[pof_value_col],
+    errors="coerce"
+)
+
 valid_pof = working_df[pof_value_col].dropna()
 
 n_bins = min(3, valid_pof.nunique())
@@ -187,7 +192,7 @@ _, bins = pd.qcut(
 )
 
 labels = [
-    f"{bins:.2f} - {bins[i+1]:.2f}"
+    f"{bins[i]:.2f} - {bins[i+1]:.2f}"
     for i in range(len(bins) - 1)
 ]
 
