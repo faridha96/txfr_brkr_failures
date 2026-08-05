@@ -52,6 +52,26 @@ def get_default_index(possible_names):
     return 0
 
 
+asset_id_col = st.sidebar.selectbox(
+"Asset ID Column",
+df.columns
+)
+
+
+pof_value_col = st.sidebar.selectbox(
+    "POF Value Column",
+    df.columns
+)
+
+
+risk_col = st.sidebar.selectbox(
+    "Risk Bucket Column",
+    df.columns,
+    index=get_default_index(
+        ["risk", "risk_bucket"]
+    )
+)
+
 asset_col = st.sidebar.selectbox(
     "Asset Type Column",
     df.columns,
@@ -68,18 +88,19 @@ line_col = st.sidebar.selectbox(
     )
 )
 
-risk_col = st.sidebar.selectbox(
-    "Risk Bucket Column",
-    df.columns,
-    index=get_default_index(
-        ["risk", "risk_bucket"]
-    )
-)
 
 age_col = st.sidebar.selectbox(
     "Failure Indicator Column",
     df.columns
 )
+
+
+failure_type_col = st.sidebar.selectbox(
+    "Failure Type Column",
+    df.columns
+)
+
+
 
 date_col = st.sidebar.selectbox(
     "Date Column",
@@ -89,20 +110,6 @@ date_col = st.sidebar.selectbox(
     )
 )
 
-failure_type_col = st.sidebar.selectbox(
-    "Failure Type Column",
-    df.columns
-)
-
-asset_id_col = st.sidebar.selectbox(
-"Asset ID Column",
-df.columns
-)
-
-pof_value_col = st.sidebar.selectbox(
-    "POF Value Column",
-    df.columns
-)
 
 # ==========================================================
 # DATA CLEANING
@@ -145,6 +152,7 @@ working_df[date_col] = pd.to_datetime(
 working_df[failure_type_col] = (
     working_df[failure_type_col]
     .astype(str)
+    .strip()
     .str.upper()
 )
 
