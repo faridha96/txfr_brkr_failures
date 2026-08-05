@@ -767,7 +767,18 @@ with tab3:
             fig,
             use_container_width=True
         )
-
+        
+        st.markdown("### Failure Risk Bucket vs POF Quartile")
+        
+        failure_heatmap = create_quantile_heatmap_data(
+                    failure_df
+                )
+        
+        plot_quantile_heatmap(
+                    failure_heatmap,
+                    "Failure Risk Bucket vs POF Quartile"
+                )
+        
 
         failure_summary = (
             failure_df
@@ -790,17 +801,7 @@ with tab3:
             use_container_width=True
         )
 
-        st.markdown("### Failure Risk Bucket vs POF Quartile")
-
-        failure_heatmap = create_quantile_heatmap_data(
-            failure_df
-        )
-
-        plot_quantile_heatmap(
-            failure_heatmap,
-            "Failure Risk Bucket vs POF Quartile"
-        )
-
+       
         st.dataframe(
             failure_heatmap,
             use_container_width=True
