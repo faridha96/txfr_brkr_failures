@@ -185,13 +185,19 @@ quantiles = pd.qcut(
     q=3,
     duplicates="drop"
 )
-
 working_df["POF_Range"] = quantiles.apply(
     lambda x: (
         f"{x.left:.3f} - {x.right:.3f}"
         if pd.notna(x)
         else None
     )
+)
+
+st.write(
+"POF Range Labels:",
+working_df["POF_Range"]
+.dropna()
+.unique()
 )
 
 working_df["COF"] = pd.to_numeric(
@@ -524,7 +530,6 @@ def create_quantile_heatmap_data(data):
                 "POF_Range"
             ]
         ]
-        .drop_duplicates()
     )
 
     matrix = pd.crosstab(
