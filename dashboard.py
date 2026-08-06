@@ -59,11 +59,11 @@ df.columns
 
 
 pof_value_col = st.sidebar.selectbox(
-    "POF Value Column",
+    "Risk_Bucket Value Column",
     df.columns
 )
 st.write(
-f"Currently selected POF column: {pof_value_col}"
+f"Currently selected Risk_Bucket column: {pof_value_col}"
 )
 st.write(
 df[pof_value_col].head(20)
@@ -176,16 +176,16 @@ working_df[pof_value_col] = pd.to_numeric(
 )
 
 # ==========================================================
-# CREATE POF / COF
+# CREATE Risk_Bucket / COF_Bucket
 # ==========================================================
 
-working_df["POF"] = pd.to_numeric(
+working_df["Risk_Bucket"] = pd.to_numeric(
     working_df[risk_col].str[0],
     errors="coerce"
 )
 
 # ==========================================================
-# POF RANGE BUCKETS
+# Risk_Bucket RANGE BUCKETS
 # ==========================================================
 working_df[pof_value_col] = pd.to_numeric(
 working_df[pof_value_col],
@@ -198,7 +198,7 @@ q=4,
 duplicates="drop"
 )
 # Convert intervals to actual range labels
-working_df["POF_Range"] = pof_quantiles.apply(
+working_df["Risk_Bucket_Range"] = pof_quantiles.apply(
     lambda x: (
     f"{float(x.left):.4f} - {float(x.right):.4f}"
     if pd.notna(x)
@@ -206,21 +206,21 @@ working_df["POF_Range"] = pof_quantiles.apply(
     )
     )
     # Debug
-st.write("Selected POF Column:", pof_value_col)
+st.write("Selected Risk_Bucket Column:", pof_value_col)
 st.write(
 working_df[[pof_value_col]]
 .head(20)
 )
 
-working_df["COF"] = pd.to_numeric(
+working_df["COF_Bucket_Bucket"] = pd.to_numeric(
     working_df[risk_col].str[1],
     errors="coerce"
 )
 
 working_df = working_df[
-    working_df["POF"].between(1, 5)
+    working_df["Risk_Bucket"].between(1, 5)
     &
-    working_df["COF"].between(1, 5)
+    working_df["COF_Bucket_Bucket"].between(1, 5)
 ]
 
 if working_df.empty:
@@ -403,14 +403,14 @@ k5.metric(
 def create_risk_distribution(data):
 
     summary = (
-        data[[asset_id_col, "POF"]]
+        data[[asset_id_col, "Risk_Bucket"]]
         .drop_duplicates()
-        .groupby("POF")
+        .groupby("Risk_Bucket")
         .size()
         .reset_index(name="Asset Count")
     )
 
-    summary = summary.set_index("POF")
+    summary = summary.set_index("Risk_Bucket")
 
     summary = summary.reindex(
         range(1, 6),
@@ -431,14 +431,14 @@ def create_risk_distribution(data):
 def create_risk_bucket_summary(data):
 
     summary = (
-        data[[asset_id_col, "POF"]]
+        data[[asset_id_col, "Risk_Bucket"]]
         .drop_duplicates()
-        .groupby("POF")
+        .groupby("Risk_Bucket")
         .size()
         .reset_index(name="Asset Count")
     )
 
-    summary = summary.set_index("POF").reindex(
+    summary = summary.set_index("Risk_Bucket").reindex(
         range(1, 6),
         fill_value=0
     )
@@ -448,7 +448,7 @@ def create_risk_bucket_summary(data):
 def create_failure_matrix(data):
 
     matrix = pd.crosstab(
-        data["POF"],
+        data["Risk_Bucket"],
         data[failure_type_col]
     )
 
@@ -515,8 +515,8 @@ def plot_heatmap(
         color_continuous_scale=colorscale,
         aspect="auto",
         labels={
-            "x": "COF Bucket",
-            "y": "POF Bucket",
+            "x": "COF_Bucket Bucket",
+            "y": "Risk_Bucket Bucket",
             "color": "Count"
         }
     )
@@ -537,14 +537,14 @@ def create_quantile_heatmap_data(data):
     temp = data[
     [
     asset_id_col,
-    "POF",
-    "POF_Range"
+    "Risk_Bucket",
+    "Risk_Bucket_Range"
     ]
-    ].dropna(subset=["POF_Range"])
+    ].dropna(subset=["Risk_Bucket_Range"])
 
     matrix = pd.crosstab(
-    temp["POF"],
-    temp["POF_Range"]
+    temp["Risk_Bucket"],
+    temp["Risk_Bucket_Range"]
     )
 
     matrix = matrix.reindex(
@@ -588,7 +588,7 @@ def plot_quantile_heatmap(matrix, title):
 
     fig.update_layout(
         title=title,
-        xaxis_title="POF Quartile",
+        xaxis_title="Risk_Bucket Quartile",
         yaxis_title="Risk Bucket"
     )
 
@@ -633,13 +633,13 @@ with tab1:
 
         fig = px.bar(
             brkr_summary,
-            x="POF",
+            x="Risk_Bucket",
             y="Asset Count",
             text="Asset Count",
             title="BRKR Risk Bucket Distribution"
         )
 
-        st.markdown("### Risk Bucket vs POF Quartile")
+        st.markdown("### Risk Bucket vs Risk_Bucket Quartile")
 
         brkr_heatmap = create_quantile_heatmap_data(
             brkr_df
@@ -647,7 +647,7 @@ with tab1:
 
         plot_quantile_heatmap(
             brkr_heatmap,
-            "BRKR Risk Bucket vs POF Quartile"
+            "BRKR Risk Bucket vs Risk_Bucket Quartile"
         )
 
         st.plotly_chart(
@@ -690,13 +690,13 @@ with tab2:
 
         fig = px.bar(
             txfr_summary,
-            x="POF",
+            x="Risk_Bucket",
             y="Asset Count",
             text="Asset Count",
             title="TXFR Risk Bucket Distribution"
         )
 
-        st.markdown("### Risk Bucket vs POF Quartile")
+        st.markdown("### Risk Bucket vs Risk_Bucket Quartile")
 
         txfr_heatmap = create_quantile_heatmap_data(
             txfr_df
@@ -704,7 +704,7 @@ with tab2:
 
         plot_quantile_heatmap(
             txfr_heatmap,
-            "TXFR Risk Bucket vs POF Quartile"
+            "TXFR Risk Bucket vs Risk_Bucket Quartile"
         )
 
 
@@ -753,7 +753,7 @@ with tab3:
     else:
 
         failure_matrix = pd.crosstab(
-            failure_df["POF"],
+            failure_df["Risk_Bucket"],
             failure_df[failure_type_col]
         )
 
@@ -797,7 +797,7 @@ with tab3:
             use_container_width=True
         )
 
-        st.markdown("### Failure Risk Bucket vs POF Quartile")
+        st.markdown("### Failure Risk Bucket vs Risk_Bucket Quartile")
 
         failure_heatmap = create_quantile_heatmap_data(
                     failure_df
@@ -805,19 +805,19 @@ with tab3:
         st.write(brkr_heatmap.columns.tolist())
         plot_quantile_heatmap(
                     failure_heatmap,
-                    "Failure Risk Bucket vs POF Quartile"
+                    "Failure Risk Bucket vs Risk_Bucket Quartile"
                 )
 
 
         # ===========================================
-        # FAILURE RATE BY POF BUCKET
+        # FAILURE RATE BY Risk_Bucket BUCKET
         # ===========================================
 
         # Total assets in each bucket
         asset_bucket_counts = (
-            filtered_df[[asset_id_col, "POF"]]
+            filtered_df[[asset_id_col, "Risk_Bucket"]]
             .drop_duplicates()
-            .groupby("POF")
+            .groupby("Risk_Bucket")
             .size()
             .reset_index(name="Asset Count")
         )
@@ -825,7 +825,7 @@ with tab3:
         # Total failures in each bucket
         failure_bucket_counts = (
             failure_df
-            .groupby("POF")
+            .groupby("Risk_Bucket")
             .size()
             .reset_index(name="Failure Count")
         )
@@ -834,7 +834,7 @@ with tab3:
         failure_rate_table = pd.merge(
             asset_bucket_counts,
             failure_bucket_counts,
-            on="POF",
+            on="Risk_Bucket",
             how="left"
         )
 
@@ -855,7 +855,7 @@ with tab3:
         # Ensure all buckets 1-5 appear
         failure_rate_table = (
             failure_rate_table
-            .set_index("POF")
+            .set_index("Risk_Bucket")
             .reindex(range(1, 6), fill_value=0)
             .reset_index()
         )
@@ -871,7 +871,7 @@ with tab3:
         failure_summary = (
             failure_df
             .groupby(
-                ["POF", failure_type_col]
+                ["Risk_Bucket", failure_type_col]
             )
             .size()
             .reset_index(name="Count")
