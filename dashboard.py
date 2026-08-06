@@ -154,6 +154,7 @@ working_df[failure_type_col] = (
     .astype(str)
     .str.strip()
     .str.upper()
+    .str.replace("IN-SERVIEC ", "")
 )
 
 working_df[failure_type_col] = (
