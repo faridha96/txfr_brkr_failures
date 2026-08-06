@@ -1,3 +1,5 @@
+from matplotlib import lines
+
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -62,6 +64,13 @@ pof_value_col = st.sidebar.selectbox(
     "POF Value Column",
     df.columns
 )
+st.write(
+f"Currently selected POF column: {pof_value_col}"
+)
+st.write(
+df[pof_value_col].head(20)
+)
+
 
 
 risk_col = st.sidebar.selectbox(
@@ -199,12 +208,11 @@ working_df["POF_Range"] = pof_quantiles.apply(
     )
     )
     # Debug
+st.write("Selected POF Column:", pof_value_col)
 st.write(
-    working_df[
-    [pof_value_col, "POF_Range"]
-    ]
-    .head(20)
-    )
+working_df[[pof_value_col]]
+.head(20)
+)
 
 working_df["COF"] = pd.to_numeric(
     working_df[risk_col].str[1],
