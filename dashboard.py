@@ -154,7 +154,7 @@ working_df[failure_type_col] = (
     .astype(str)
     .str.strip()
     .str.upper()
-    .str.replace("IN-SERVICE ", "")
+    .str.replace("IN-SERVICE FAILURE", "FAILURE")
 )
 
 working_df[failure_type_col] = (
