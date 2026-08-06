@@ -162,7 +162,6 @@ working_df[failure_type_col] = (
 )
 
 working_df[pof_value_col] = pd.to_numeric(
-    working_df[pof_value_col].astyp(float),
     working_df[pof_value_col].astype(float),
     errors="coerce",
     downcast ="float"
@@ -181,7 +180,6 @@ working_df["POF"] = pd.to_numeric(
 # POF RANGE BUCKETS
 # ==========================================================
 working_df[pof_value_col] = pd.to_numeric(
-working_df[pof_value_col].astyp(float),
 working_df[pof_value_col].astype(float),
 errors="coerce",
     downcast ="float"
