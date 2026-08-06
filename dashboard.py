@@ -59,17 +59,9 @@ df.columns
 
 
 pof_value_col = st.sidebar.selectbox(
-    "Risk_Bucket Value Column",
+    "POF Value Column",
     df.columns
 )
-st.write(
-f"Currently selected Risk_Bucket column: {pof_value_col}"
-)
-st.write(
-df[pof_value_col].head(20)
-)
-
-
 
 risk_col = st.sidebar.selectbox(
     "Risk Bucket Column",
@@ -205,12 +197,6 @@ working_df["Risk_Bucket_Range"] = pof_quantiles.apply(
     else None
     )
     )
-    # Debug
-st.write("Selected Risk_Bucket Column:", pof_value_col)
-st.write(
-working_df[[pof_value_col]]
-.head(20)
-)
 
 working_df["COF_Bucket_Bucket"] = pd.to_numeric(
     working_df[risk_col].str[1],
@@ -802,7 +788,6 @@ with tab3:
         failure_heatmap = create_quantile_heatmap_data(
                     failure_df
                 )
-        st.write(brkr_heatmap.columns.tolist())
         plot_quantile_heatmap(
                     failure_heatmap,
                     "Failure Risk Bucket vs Risk_Bucket Quartile"
