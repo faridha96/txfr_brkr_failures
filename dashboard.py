@@ -181,30 +181,30 @@ working_df["POF"] = pd.to_numeric(
 # POF RANGE BUCKETS
 # ==========================================================
 working_df[pof_value_col] = pd.to_numeric(
-working_df[pof_value_col].astype(float),
-errors="coerce",
-    downcast ="float"
-)
-
-# Create quantiles and capture bins
-_, bins = pd.qcut(
 working_df[pof_value_col],
-q=3,
-retbins=True,
+errors="coerce"
+)
+# Create quantile intervals
+pof_quantiles = pd.qcut(
+working_df[pof_value_col],
+q=4,
 duplicates="drop"
 )
-# Build labels from actual bin edges
-range_labels = [
-f"{bins[i]:.3f} - {bins[i+1]:.3f}"
-for i in range(len(bins) - 1)
-]
-# Create ordered categorical ranges
-working_df["POF_Range"] = pd.qcut(
-working_df[pof_value_col],
-q=len(range_labels),
-labels=range_labels,
-duplicates="drop"
-)
+# Convert intervals to actual range labels
+working_df["POF_Range"] = pof_quantiles.apply(
+    lambda x: (
+    f"{float(x.left):.4f} - {float(x.right):.4f}"
+    if pd.notna(x)
+    else None
+    )
+    )
+    # Debug
+st.write(
+    working_df[
+    [pof_value_col, "POF_Range"]
+    ]
+    .head(20)
+    )
 
 working_df["COF"] = pd.to_numeric(
     working_df[risk_col].str[1],
@@ -527,30 +527,25 @@ def plot_heatmap(
 
 
 def create_quantile_heatmap_data(data):
-    temp = (
-    data[
+
+    temp = data[
     [
     asset_id_col,
     "POF",
     "POF_Range"
     ]
-    ]
-    .dropna(subset=["POF_Range"])
-    )
+    ].dropna(subset=["POF_Range"])
+
     matrix = pd.crosstab(
     temp["POF"],
     temp["POF_Range"]
     )
-    # Force risk buckets 1-5
+
     matrix = matrix.reindex(
     index=[1, 2, 3, 4, 5],
     fill_value=0
     )
-    # Force column order to match actual POF ranges
-    matrix = matrix.reindex(
-    columns=range_labels,
-    fill_value=0
-    )
+
     return matrix
 
 def plot_quantile_heatmap(matrix, title):
@@ -801,7 +796,7 @@ with tab3:
         failure_heatmap = create_quantile_heatmap_data(
                     failure_df
                 )
-
+        st.write(brkr_heatmap.columns.tolist())
         plot_quantile_heatmap(
                     failure_heatmap,
                     "Failure Risk Bucket vs POF Quartile"
